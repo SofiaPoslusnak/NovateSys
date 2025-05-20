@@ -7,12 +7,12 @@
   <script src="../arjs/aframe-ar.js"></script>
 </head>
 <body>
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;">
     <a-marker preset="custom" type="pattern" url="../assets/pattern-letterA.patt">
       <!-- Текст над моделлю -->
       <a-text value="Thank You Mario But Our Princess Is in Another Castle" position="0 0.5 0" align="center" color="white"></a-text>
       
-      <!-- Фортеця з локальною текстурою цегли -->
+      <!-- Фортеця з тестовою текстурою -->
       <a-box src="../assets/bricks.jpg" width="1" height="1" depth="1" position="0 0 0">
         <!-- Флагшток -->
         <a-cylinder height="1.5" radius="0.05" color="gray" position="0.6 0.75 0"></a-cylinder>
