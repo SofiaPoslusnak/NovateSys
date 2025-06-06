@@ -51,7 +51,7 @@
 
     const group = new THREE.Group();
 
-    const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+    const saturnGeometry = new THREE.SphereGeometry(0.15, 32, 32);
     let saturn;
     textureLoader.load(
       '../week05/2k_saturn.jpg',
@@ -68,7 +68,7 @@
       }
     );
 
-    const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
+    const ringGeometry = new THREE.RingGeometry(0.18625, 0.3425, 64);
     textureLoader.load(
       '../week05/2k_saturn_ring_alpha.png',
       (texture) => {
