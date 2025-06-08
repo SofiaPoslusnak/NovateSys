@@ -2,24 +2,54 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Mario AR Scene</title>
+  <title>Saturn AR Scene</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.5/aframe/build/aframe-ar.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;">
-    <a-marker preset="custom" type="pattern" url="./assets/pattern-letterA.patt">
-      <a-text value="Thank You Mario But Our Princess Is in Another Castle" position="0 0.5 0" align="center" color="white"></a-text>
-      <a-box src="./assets/bricks.jpg" width="1" height="1" depth="1" position="0 0 0">
-        <a-cylinder height="1.5" radius="0.05" color="gray" position="0.6 0.75 0"></a-cylinder>
-        <a-plane id="flag" width="0.4" height="0.2" color="red" position="0.6 1.5 0" rotation="0 0 0">
-          <a-animation attribute="position" to="0.6 1.5 0" dur="2000" fill="forwards" direction="alternate" repeat="indefinite"></a-animation>
-          <a-animation attribute="rotation" to="0 45 0" dur="2000" fill="forwards" direction="alternate" repeat="indefinite" begin="2000ms"></a-animation>
-        </a-plane>
-      </a-box>
-      <a-light type="point" intensity="1.5" position="5 0 0" color="#FFFFFF"></a-light>
-      <a-entity camera></a-entity>
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <a-marker preset="custom" type="pattern" url="../assets/pattern-Rubens-Saturno-detalle.patt">
+      <a-entity rotation="27 0 0">
+        <a-entity>
+          <a-sphere
+            radius="0.6"
+            segments-height="32"
+            segments-width="64"
+            src="../week05/2k_saturn.jpg"
+            position="0 0 0">
+            <a-box
+              position="0.7 0 0"
+              width="0.05"
+              height="0.05"
+              depth="0.05"
+              color="#FF0000">
+            </a-box>
+          </a-sphere>
+          <a-ring
+            radius-inner="0.745"
+            radius-outer="1.37"
+            theta-length="360"
+            src="../week05/2k_saturn_ring_alpha.png"
+            position="0 0 0"
+            material="side: double; transparent: true">
+          </a-ring>
+          <a-animation
+            attribute="rotation"
+            to="0 360 0"
+            dur="10000"
+            repeat="indefinite"
+            easing="linear">
+          </a-animation>
+        </a-entity>
+      </a-entity>
+      <a-light
+        type="point"
+        intensity="1.5"
+        position="5 0 0"
+        color="#FFFFFF">
+      </a-light>
     </a-marker>
+    <a-entity camera></a-entity>
   </a-scene>
 </body>
 </html>
