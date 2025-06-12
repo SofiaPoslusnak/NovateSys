@@ -40,7 +40,7 @@ const progress = document.getElementById("progress");
 const loader = new GLTFLoader();
 
 loader.load(
-    '../assets/dog.glb', // Локальний шлях до моделі
+    '../assets/laptop.glb', // Локальний шлях до моделі
     function (gltf) {
         console.log(gltf); // Перевіряємо, чи модель завантажилася
         scene.add(gltf.scene);
