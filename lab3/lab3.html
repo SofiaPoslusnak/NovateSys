@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Saturn WebXR Scene</title>
+  <title>AR Castle WebXR Scene</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { margin: 0; overflow: hidden; }
@@ -35,82 +35,208 @@
     import * as THREE from 'three';
     import { ARButton } from 'three/addons/webxr/ARButton.js';
 
+    // Initialize renderer with WebXR support
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
     document.getElementById('ar-container').appendChild(renderer.domElement);
 
+    // Add AR button
     document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
+    // Scene and camera
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-    
+
+    // Texture Loader
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
 
+    // Group for scene components
     const group = new THREE.Group();
+    group.scale.set(0.5, 0.5, 0.5); // Зменшення сцени вдвічі
 
-    const saturnGeometry = new THREE.SphereGeometry(0.15, 32, 32);
-    let saturn;
-    textureLoader.load(
-      '../week05/2k_saturn.jpg',
-      (texture) => {
-        texture.colorSpace = 'srgb';
-        const saturnMaterial = new THREE.MeshStandardMaterial({ map: texture });
-        saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-        group.add(saturn);
-        console.log('Saturn texture loaded successfully');
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading Saturn texture:', error);
-      }
-    );
-
-    const ringGeometry = new THREE.RingGeometry(0.18625, 0.3425, 64);
-    textureLoader.load(
-      '../week05/2k_saturn_ring_alpha.png',
-      (texture) => {
-        texture.colorSpace = 'srgb';
-        const ringMaterial = new THREE.MeshStandardMaterial({
-          map: texture,
-          side: THREE.DoubleSide,
-          transparent: true
-        });
-        const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-        rings.rotation.x = Math.PI / 2;
-        group.add(rings);
-        console.log('Rings texture loaded successfully');
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading Rings texture:', error);
-      }
-    );
-
-    group.rotation.x = THREE.MathUtils.degToRad(27);
-    group.position.set(0, 0, -1.5); 
-    scene.add(group);
-
-    const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
-    pointLight.position.set(5, 0, 0);
-    scene.add(pointLight);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
+    const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    // Текстура цегли
+    let brickTexture;
+    textureLoader.load(
+      'https://raw.githubusercontent.com/aframevr/sample-assets/master/assets/images/bricks/brick_bump.jpg',
+      (texture) => {
+        texture.colorSpace = 'srgb';
+        brickTexture = texture;
+        console.log('Brick texture loaded successfully');
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading brick texture:', error);
+      }
+    );
+
+    // Основна частина замку
+    const castleBaseGeometry = new THREE.BoxGeometry(10, 2, 10);
+    const castleBaseMaterial = new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa,
+      bumpMap: brickTexture,
+      bumpScale: 0.1,
+      roughness: 0.7,
+      metalness: 0.2
+    });
+    const castleBase = new THREE.Mesh(castleBaseGeometry, castleBaseMaterial);
+    castleBase.position.set(0, 1, 0);
+    group.add(castleBase);
+
+    // Кутові вежі (циліндри та конуси)
+    const towerPositions = [
+      [4.5, 3.5, 4.5], [4.5, 3.5, -4.5],
+      [-4.5, 3.5, 4.5], [-4.5, 3.5, -4.5]
+    ];
+
+    towerPositions.forEach(pos => {
+      // Циліндр
+      const towerGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 32);
+      const towerMaterial = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        bumpMap: brickTexture,
+        bumpScale: 0.1,
+        roughness: 0.7,
+        metalness: 0.2
+      });
+      const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+      tower.position.set(pos[0], pos[1], pos[2]);
+      group.add(tower);
+
+      // Конус
+      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
+      const coneMaterial = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        bumpMap: brickTexture,
+        bumpScale: 0.1,
+        roughness: 0.7,
+        metalness: 0.2
+      });
+      const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.position.set(pos[0], pos[1] + 1.5, pos[2]);
+      group.add(cone);
+    });
+
+    // Флагшток
+    const flagpoleGeometry = new THREE.CylinderGeometry(0.1, 0.1, 6, 32);
+    const flagpoleMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const flagpole = new THREE.Mesh(flagpoleGeometry, flagpoleMaterial);
+    flagpole.position.set(0, 5, 0);
+    group.add(flagpole);
+
+    // Прапор
+    const flagGeometry = new THREE.PlaneGeometry(3, 1);
+    const flagMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff4500,
+      side: THREE.DoubleSide
+    });
+    const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+    const flagGroup = new THREE.Group();
+    flagGroup.add(flag);
+    flagGroup.position.set(1.5, 7.5, 0);
+    group.add(flagGroup);
+
+    // Анімація прапора (рух вгору-вниз)
+    let flagTime = 0;
+    const animateFlagPosition = (delta) => {
+      flagTime += delta;
+      const t = (Math.sin(flagTime * Math.PI / 2) + 1) / 2; // 0 to 1
+      flagGroup.position.y = 7.5 - 2 * t; // Від 7.5 до 5.5
+    };
+
+    // Анімація обертання прапора
+    let flagRotationTime = 0;
+    const animateFlagRotation = (delta) => {
+      flagRotationTime += delta;
+      const t = (Math.sin(flagRotationTime * Math.PI / 1.5) + 1) / 2; // 0 to 1
+      flag.rotation.y = THREE.MathUtils.degToRad(15 * (t - 0.5) * 2); // Від 0 до 15 градусів
+    };
+
+    // Текст на прапорі (Canvas текстура)
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const context = canvas.getContext('2d');
+    context.fillStyle = 'rgba(0,0,0,0)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#ffffff';
+    context.font = '40px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('Thank You Mario But Our Princess Is in Another Castle', canvas.width / 2, canvas.height / 2);
+    const textTexture = new THREE.CanvasTexture(canvas);
+    textTexture.colorSpace = 'srgb';
+    const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true, side: THREE.DoubleSide });
+    const textGeometry = new THREE.PlaneGeometry(2.8, 0.933); // Співвідношення 3:1
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.set(0, 0, 0.01);
+    flag.add(textMesh);
+
+    // Hit-test setup for WebXR
+    let hitTestSource = null;
+    let hitTestSourceRequested = false;
+    renderer.xr.addEventListener('sessionstart', async () => {
+      const session = renderer.xr.getSession();
+      const viewerReferenceSpace = await session.requestReferenceSpace('viewer');
+      hitTestSource = await session.requestHitTestSource({ space: viewerReferenceSpace });
+      hitTestSourceRequested = true;
+      // Початкова позиція групи
+      group.position.set(0, 0, -2); // 2 метри перед камерою
+      scene.add(group);
+      console.log('WebXR session started with hit-test');
+    });
+
+    // Анімація
     const clock = new THREE.Clock();
+    let cameraAnimationStart = null;
     const animate = () => {
       const delta = clock.getDelta();
-      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta;
+      if (hitTestSourceRequested && hitTestSource) {
+        const session = renderer.xr.getSession();
+        if (session) {
+          const frame = renderer.xr.getFrame();
+          const hitTestResults = frame.getHitTestResults(hitTestSource);
+          if (hitTestResults.length > 0) {
+            const hit = hitTestResults[0];
+            const pose = hit.getPose(renderer.xr.getReferenceSpace());
+            group.position.setFromMatrixPosition(new THREE.Matrix4().fromArray(pose.transform.matrix));
+          }
+        }
+      }
+      // Анімація позиції групи
+      if (cameraAnimationStart === null) {
+        cameraAnimationStart = clock.getElapsedTime();
+      }
+      const elapsed = clock.getElapsedTime() - cameraAnimationStart;
+      const animationDuration = 5; // 5 секунд
+      if (elapsed < animationDuration) {
+        const t = elapsed / animationDuration;
+        group.position.z = -2 - (5 - 2) * t; // Від -2 до -5
+      } else {
+        group.position.z = -5; // Кінцева позиція
+      }
+      // Анімація прапора
+      animateFlagPosition(delta);
+      animateFlagRotation(delta);
       renderer.render(scene, camera);
     };
 
+    // WebXR render loop
     renderer.setAnimationLoop(() => {
       animate();
     });
 
+    // Обробка зміни розміру вікна
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
