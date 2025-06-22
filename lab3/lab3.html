@@ -55,7 +55,7 @@
 
     // Group for scene components
     const group = new THREE.Group();
-    group.scale.set(0.2, 0.2, 0.2);
+    group.scale.set(0.015, 0.015, 0.015);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -191,7 +191,7 @@
       hitTestSource = await session.requestHitTestSource({ space: viewerReferenceSpace });
       hitTestSourceRequested = true;
       // Початкова позиція групи (знижено по Y)
-      group.position.set(0, -0.5, -2); // 2 метри перед камерою, нижче на 0.5
+      group.position.set(0, -4, -2); // 2 метри перед камерою, нижче на 0.5
       scene.add(group);
       console.log('WebXR session started with hit-test');
     });
