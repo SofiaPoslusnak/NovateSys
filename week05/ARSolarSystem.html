@@ -1,46 +1,155 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html>
-	<head>
-		<script src="../aframe/aframe.min.js"></script>
-		<script src="../arjs/aframe-ar.js"></script>
-   		<script src="planet.js"></script>
-		
-	</head>
-	<body>
-        	<a-scene embedded arjs>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планетарна модель сонячної системи з AR (MindAR)</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #ar-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.141.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/",
+                "mind-ar": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="ar-container"></div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { MindARThree } from 'mind-ar';
 
-			<a-marker type="pattern" url="../assets/pattern-letterA.patt">
+        const mindarThree = new MindARThree({
+            container: document.getElementById('ar-container'),
+            imageTargetSrc: '../assets/pattern-letterA.mind',
+        });
 
-				<a-entity scale="0.002 0.002 0.002" rotation="-90 0 0">
- 					<!--<a-sky src="2k_stars.jpg" radius=6000></a-sky>-->
+        const { renderer, scene, camera } = mindarThree;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
- 					<!--<a-camera position="0 0 1000" cursor-visible="true" cursorscale="2" cursor-color="#0095DD" cursor-opacity="0.5"></a-camera>-->
- 			
-					<a-entity geometry="primitive: sphere; radius: 20.510" material="src: 2k_sun.jpg" planet="dist: 0; mass: 1.989e30; name: Sun"></a-entity>
- 			
-					<a-entity geometry="primitive: sphere; radius: 2.4397" material="src: 2k_mercury.jpg" planet="dist: 57.910e9; mass: 3.285e23; T: 88; name: Mercury"></a-entity>
- 			
-					<a-entity geometry="primitive: sphere; radius: 6.0518" material="src: 2k_venus_atmosphere.jpg" planet="dist: 108.2e9; mass: 4.876e24; T: 224.7; name: Venus"></a-entity>
- 			
-					<a-entity geometry="primitive: sphere; radius: 6.371" material="src: 2k_earth_daymap.jpg" planet="dist: 149.598023e9; mass: 5.972168e24; T: 365.256; name: Earth"></a-entity>
+        const anchor = mindarThree.addAnchor(0);
 
-					<a-entity geometry="primitive: sphere; radius: 3.3895" material="src: 2k_mars.jpg" planet="dist: 227.939366e9; mass: 6.4171e23; T: 686.980; name: Mars"></a-entity>
+        const planetGroup = new THREE.Group();
+        planetGroup.scale.set(0.002, 0.002, 0.002);
+        planetGroup.rotation.x = -Math.PI / 2; 
+        anchor.group.add(planetGroup);
 
-					<a-entity geometry="primitive: sphere; radius: 69.911" material="src: 2k_jupiter.jpg" planet="dist: 778.479e9; mass: 1.8982e27; T: 4332.59; name: Jupiter"></a-entity>
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.setCrossOrigin('anonymous');
 
-					<a-entity planet="dist: 1433.53e9; mass: 5.6834e26; T: 10759.22; name: Saturn">
-						<a-entity geometry="primitive: sphere; radius: 58.232" material="src: 2k_saturn.jpg" ></a-entity>
-						<a-ring src="2k_saturn_ring_alpha.png" radius-inner="68" radius-outer="120" rotation="60 20 0"></a-ring>
-					</a-entity>
+        const createPlanet = (radius, texturePath, position, name, orbitPeriod) => {
+            const geometry = new THREE.SphereGeometry(radius, 32, 32);
+            let planet;
+            textureLoader.load(
+                texturePath,
+                (texture) => {
+                    texture.colorSpace = 'srgb';
+                    const material = new THREE.MeshStandardMaterial({ map: texture });
+                    planet = new THREE.Mesh(geometry, material);
+                    planet.userData = { name, orbitPeriod };
+                    const orbitGroup = new THREE.Group();
+                    orbitGroup.position.set(0, 0, 0);
+                    orbitGroup.add(planet);
+                    planet.position.set(position.x, position.y, position.z);
+                    planetGroup.add(orbitGroup);
+                    console.log(`${name} texture loaded successfully`);
+                },
+                undefined,
+                (error) => {
+                    console.error(`Error loading ${name} texture:`, error);
+                }
+            );
+            return planet;
+        };
 
-					<a-entity geometry="primitive: sphere; radius: 25.362" material="src: 2k_uranus.jpg" planet="dist: 2870.972e9; mass: 8.6810e25; T: 30688.5; name: Uranus"></a-entity>
+        createPlanet(20.510, '2k_sun.jpg', new THREE.Vector3(0, 0, 0), 'Sun', 0); // Солнце неподвижно
+        createPlanet(2.4397, '2k_mercury.jpg', new THREE.Vector3(57.910e9 * 1e-9, 0, 0), 'Mercury', 2000);
+        createPlanet(6.0518, '2k_venus_atmosphere.jpg', new THREE.Vector3(108.2e9 * 1e-9, 0, 0), 'Venus', 3000);
+        createPlanet(6.371, '2k_earth_daymap.jpg', new THREE.Vector3(149.598023e9 * 1e-9, 0, 0), 'Earth', 4000);
+        createPlanet(3.3895, '2k_mars.jpg', new THREE.Vector3(227.939366e9 * 1e-9, 0, 0), 'Mars', 5000);
+        createPlanet(69.911, '2k_jupiter.jpg', new THREE.Vector3(778.479e9 * 1e-9, 0, 0), 'Jupiter', 6000);
 
-					<a-entity geometry="primitive: sphere; radius: 24.622" material="src: 2k_neptune.jpg" planet="dist: 4500e9; mass: 1.02413e26; T: 60195; name: Neptune"></a-entity>
-				</a-entity>
-			</a-marker>
-			<a-entity camera></a-entity>
-			<a-entity main></a-entity>
-		</a-scene>
-	</body>
+        let saturn;
+        const saturnGeometry = new THREE.SphereGeometry(58.232, 32, 32);
+        textureLoader.load(
+            '2k_saturn.jpg',
+            (texture) => {
+                texture.colorSpace = 'srgb';
+                const saturnMaterial = new THREE.MeshStandardMaterial({ map: texture });
+                saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
+                saturn.userData = { name: 'Saturn', orbitPeriod: 7000 };
+                const saturnOrbitGroup = new THREE.Group();
+                saturnOrbitGroup.position.set(0, 0, 0);
+                saturnOrbitGroup.add(saturn);
+                saturn.position.set(1433.53e9 * 1e-9, 0, 0);
+                planetGroup.add(saturnOrbitGroup);
+                console.log('Saturn texture loaded successfully');
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading Saturn texture:', error);
+            }
+        );
+
+        const ringGeometry = new THREE.RingGeometry(68, 120, 32);
+        textureLoader.load(
+            '2k_saturn_ring_alpha.png',
+            (texture) => {
+                texture.colorSpace = 'srgb';
+                const ringMaterial = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.rotation.set(Math.PI / 3, Math.PI / 9, 0);
+                if (saturn) saturn.add(ring);
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading Saturn ring texture:', error);
+            }
+        );
+
+        createPlanet(25.362, '2k_uranus.jpg', new THREE.Vector3(2870.972e9 * 1e-9, 0, 0), 'Uranus', 8000);
+        createPlanet(24.622, '2k_neptune.jpg', new THREE.Vector3(4500e9 * 1e-9, 0, 0), 'Neptune', 9000);
+
+        const pointLight = new THREE.PointLight(0xffffff, 1.5, 100);
+        pointLight.position.set(0, 0, 0);
+        anchor.group.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const clock = new THREE.Clock();
+        const animate = () => {
+            const elapsedTime = clock.getElapsedTime();
+            planetGroup.children.forEach((orbitGroup) => {
+                const planet = orbitGroup.children[0];
+                if (planet && planet.userData.orbitPeriod) {
+                    orbitGroup.rotation.z = (2 * Math.PI * elapsedTime) / (planet.userData.orbitPeriod / 1000);
+                }
+            });
+            renderer.render(scene, camera);
+        };
+        renderer.setAnimationLoop(animate);
+
+        mindarThree.start().then(() => {
+            console.log('MindAR started');
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
 </html>
