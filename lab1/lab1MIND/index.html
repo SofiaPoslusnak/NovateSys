@@ -32,7 +32,7 @@
     // Ініціалізація MindAR
     const mindarThree = new MindARThree({
       container: document.getElementById('ar-container'),
-      imageTargetSrc: '../pattern-letterA.mind',
+      imageTargetSrc: '../assets/pattern-letterA.mind',
     });
 
     const { renderer, scene, camera } = mindarThree;
@@ -42,6 +42,9 @@
     const anchor = mindarThree.addAnchor(0);
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
+
+    // Масштабування сцени
+    anchor.group.scale.set(0.5, 0.5, 0.5); // Зменшення сцени вдвічі
 
     // Освітлення
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
