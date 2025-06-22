@@ -55,7 +55,7 @@
 
     // Group for scene components
     const group = new THREE.Group();
-    group.scale.set(0.015, 0.015, 0.015);
+    group.scale.set(0.4, 0.4, 0.4); // Масштаб сцени
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -191,7 +191,7 @@
       hitTestSource = await session.requestHitTestSource({ space: viewerReferenceSpace });
       hitTestSourceRequested = true;
       // Початкова позиція групи (знижено по Y)
-      group.position.set(0, -4, -2); // 2 метри перед камерою, нижче на 0.5
+      group.position.set(0, -0.75, -2); // 2 метри перед камерою, нижче на 0.75
       scene.add(group);
       console.log('WebXR session started with hit-test');
     });
@@ -210,7 +210,7 @@
             const hit = hitTestResults[0];
             const pose = hit.getPose(renderer.xr.getReferenceSpace());
             group.position.setFromMatrixPosition(new THREE.Matrix4().fromArray(pose.transform.matrix));
-            group.position.y -= 0.5; // Зниження позиції після hit-test
+            group.position.y -= 0.75; // Зниження позиції після hit-test
           }
         }
       }
